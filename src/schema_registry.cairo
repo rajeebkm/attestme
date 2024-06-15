@@ -6,11 +6,12 @@ use core::panic_with_felt252;
 use core::keccak::keccak_u256s_be_inputs;
 use core::traits::{Into, TryInto};
 use core::array::{ArrayTrait, SpanTrait};
+use core::debug;
 
 /// @notice A struct representing a record for a submitted schema.
 #[derive(Copy, Drop, Serde, starknet::Store)]
 struct SchemaRecord {
-    uid: u256, // The unique identifier of the schema.
+    uid: u128, // The unique identifier of the schema.
     schema: felt252, // Custom specification of the schema (e.g., an ABI). // string
     resolver: ContractAddress, // Optional schema resolver. // ISchemaResolver
     revocable: bool // Whether the schema allows revocations explicitly.
@@ -20,13 +21,15 @@ struct SchemaRecord {
 trait ISchemaRegistry<TContractState> {
     fn register(
         ref self: TContractState, schema: felt252, resolver: ContractAddress, revocable: bool
-    ) -> u256;
-    fn get_schema(self: @TContractState, uid: u256) -> SchemaRecord;
+    ) -> u128;
+    fn get_schema(self: @TContractState, uid: u128) -> SchemaRecord;
 }
 
 #[starknet::contract]
 mod SchemaRegistry {
+    use core::array::SpanTrait;
     use core::serde::Serde;
+    use super::debug::PrintTrait;
     use core::traits::Into;
     use core::array::ArrayTrait;
     use super::{
@@ -37,7 +40,7 @@ mod SchemaRegistry {
     #[storage]
     struct Storage {
         // The global mapping between schema records and their IDs.
-        _registry: LegacyMap::<u256, SchemaRecord> // bytes4 => SchemaRecord
+        _registry: LegacyMap::<u128, SchemaRecord> // bytes4 => SchemaRecord
     }
 
     #[constructor]
@@ -48,7 +51,6 @@ mod SchemaRegistry {
     /// @param registerer The address of the account used to register the schema.
     /// @param schema The schema data.
     // event Registered(bytes32 indexed uid, address indexed registerer, SchemaRecord schema);
-
     #[event]
     #[derive(Drop, starknet::Event)]
     enum Event {
@@ -58,7 +60,7 @@ mod SchemaRegistry {
     #[derive(Drop, starknet::Event)]
     struct Registered {
         #[key]
-        uid: u256, // bytes32
+        uid: u128, // bytes32
         #[key]
         registerer: ContractAddress,
         schema: SchemaRecord,
@@ -68,16 +70,14 @@ mod SchemaRegistry {
     impl SchemaRegistryImpl of super::ISchemaRegistry<ContractState> {
         fn register(
             ref self: ContractState, schema: felt252, resolver: ContractAddress, revocable: bool
-        ) -> u256 {
-            // let _resolver: ContractAddress = contract_address_const::<1>();
+        ) -> u128 {
             let mut _schemaRecord: SchemaRecord = SchemaRecord {
-                uid: EMPTY_UID, schema: schema, resolver: resolver, revocable: false
+                uid: EMPTY_UID, schema: schema, resolver: resolver, revocable: revocable
             };
 
-            let uid: u256 = self._getUID(_schemaRecord);
+            let uid: u128 = self._getUID(_schemaRecord);
             if (self._registry.read(uid).uid != EMPTY_UID) {
                 panic_with_felt252(Errors::AlreadyExists);
-            // panic!("AlreadyExists");
             }
 
             _schemaRecord.uid = uid;
@@ -95,7 +95,7 @@ mod SchemaRegistry {
             return uid;
         }
 
-        fn get_schema(self: @ContractState, uid: u256) -> SchemaRecord {
+        fn get_schema(self: @ContractState, uid: u128) -> SchemaRecord {
             return self._registry.read(uid);
         }
     }
@@ -105,7 +105,7 @@ mod SchemaRegistry {
         /// @dev Calculates a UID for a given schema.
         /// @param schemaRecord The input schema.
         /// @return schema UID.
-        fn _getUID(self: @ContractState, _schemaRecord: SchemaRecord) -> u256 {
+        fn _getUID(self: @ContractState, _schemaRecord: SchemaRecord) -> u128 {
             let mut input_array: Array<u256> = ArrayTrait::new();
             let schema_u256: u256 = _schemaRecord.schema.into();
             input_array.append(schema_u256);
@@ -116,7 +116,7 @@ mod SchemaRegistry {
                 input_array.append(0_u256); // false
             }
             let inputs: Span<u256> = input_array.span();
-            return keccak_u256s_be_inputs(inputs);
+            return keccak_u256s_be_inputs(inputs).low;
         // return keccak256(abi.encodePacked(schemaRecord.schema, schemaRecord.resolver, schemaRecord.revocable));
         }
     }
