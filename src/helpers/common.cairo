@@ -1,7 +1,7 @@
 use starknet::ContractAddress;
 
 // A representation of an empty/uninitialized UID.
-const EMPTY_UID: u256 = 0;
+const EMPTY_UID: u128 = 0;
 
 // A zero expiration represents an non-expiring attestation.
 const NO_EXPIRATION_TIME: felt252 = 0;

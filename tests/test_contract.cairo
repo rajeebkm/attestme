@@ -1,43 +1,46 @@
-// use starknet::ContractAddress;
+use core::result::ResultTrait;
+use core::debug::PrintTrait;
+use core::serde::Serde;
+use starknet::{ContractAddress, contract_address_const};
+use attestme::schema_registry::SchemaRecord;
 
-// use snforge_std::{declare, ContractClassTrait};
+use snforge_std::{declare, ContractClassTrait};
 
-// use attestme::IHelloStarknetSafeDispatcher;
-// use attestme::IHelloStarknetSafeDispatcherTrait;
+use attestme::schema_registry::ISchemaRegistrySafeDispatcher;
+use attestme::schema_registry::ISchemaRegistrySafeDispatcherTrait;
 
-// fn deploy_contract(name: felt252) -> ContractAddress {
-//     let contract = declare(name);
-//     contract.deploy(@ArrayTrait::new()).unwrap()
-// }
+fn deploy_contract(name: felt252) -> ContractAddress {
+    let contract = declare(name);
+    contract.deploy(@ArrayTrait::new()).unwrap()
+}
 
-// #[test]
-// fn test_increase_balance() {
-//     let contract_address = deploy_contract('HelloStarknet');
+#[test]
+// #[ignore()]
+fn test_increase_balance() {
+    let contract_address = deploy_contract('SchemaRegistry');
 
-//     let safe_dispatcher = IHelloStarknetSafeDispatcher { contract_address };
+    let safe_dispatcher = ISchemaRegistrySafeDispatcher { contract_address };
+    let _schemaRegistry: SchemaRecord = safe_dispatcher.get_schema(1_u128).unwrap();
+    assert(_schemaRegistry.uid == 0, 'Invalid uid');
 
-//     let balance_before = safe_dispatcher.get_balance().unwrap();
-//     assert(balance_before == 0, 'Invalid balance');
+    let schema: felt252 = 'felt252 name, u256 age';
+    let resolver: ContractAddress = contract_address_const::<1>();
+    let revocable: bool = true;
 
-//     safe_dispatcher.increase_balance(42).unwrap();
+    let uid = safe_dispatcher.register(schema, resolver, revocable);
+    let _uid = uid.unwrap();
 
-//     let balance_after = safe_dispatcher.get_balance().unwrap();
-//     assert(balance_after == 42, 'Invalid balance');
-// }
+    let _schemaRegistry: SchemaRecord = safe_dispatcher.get_schema(_uid).unwrap();
+    assert(_schemaRegistry.uid == _uid, 'Invalid uid');
+    _schemaRegistry.uid.print();
+    _schemaRegistry.schema.print();
+    _schemaRegistry.resolver.print();
+    _schemaRegistry.revocable.print();
 
-// #[test]
-// fn test_cannot_increase_balance_with_zero_value() {
-//     let contract_address = deploy_contract('HelloStarknet');
-
-//     let safe_dispatcher = IHelloStarknetSafeDispatcher { contract_address };
-
-//     let balance_before = safe_dispatcher.get_balance().unwrap();
-//     assert(balance_before == 0, 'Invalid balance');
-
-//     match safe_dispatcher.increase_balance(0) {
-//         Result::Ok(_) => panic_with_felt252('Should have panicked'),
-//         Result::Err(panic_data) => {
-//             assert(*panic_data.at(0) == 'Amount cannot be 0', *panic_data.at(0));
-//         }
-//     };
-// }
+    match safe_dispatcher.register(schema, resolver, revocable) {
+        Result::Ok(_) => panic_with_felt252('Should have panicked'),
+        Result::Err(panic_data) => {
+            assert(*panic_data.at(0) == 'AlreadyExists', *panic_data.at(0));
+        }
+    };
+}

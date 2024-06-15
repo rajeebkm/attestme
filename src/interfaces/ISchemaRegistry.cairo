@@ -19,12 +19,12 @@ trait ISchemaRegistry<TContractState> {
     /// @param resolver An optional schema resolver. // ISchemaResolver
     /// @param revocable Whether the schema allows revocations explicitly.
     /// @return The UID of the new schema. // bytes32
-    fn register(ref self: TContractState, schema: felt252, resolver: ContractAddress, revocable: bool) -> felt252;
+    fn register(ref self: TContractState, schema: felt252, resolver: ContractAddress, revocable: bool) -> u128;
 
     /// @notice Returns an existing schema by UID
     /// @param uid The UID of the schema to retrieve.
     /// @return The schema data members.
-    fn getSchema(self: @TContractState, uid: felt252) -> SchemaRecord;
+    fn get_schema(self: @TContractState, uid: u128) -> SchemaRecord;
 }
 
 
