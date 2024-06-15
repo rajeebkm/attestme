@@ -26,8 +26,3 @@ trait ISchemaRegistry<TContractState> {
     /// @return The schema data members.
     fn get_schema(self: @TContractState, uid: u128) -> SchemaRecord;
 }
-
-
-
-// /// @title ISchemaRegistry
-// /// @notice The interface of global attestation schemas for the Ethereum Attestation Service protocol.
