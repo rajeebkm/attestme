@@ -160,17 +160,19 @@ mod SAS {
 
     // ISchemaRegistry
     #[constructor]
-    fn constructor(ref self: ContractState, registry: ContractAddress) {
-        //     /// @dev Creates a new EAS instance.
-        //     /// @param registry The address of the global schema registry.
-        //     constructor(ISchemaRegistry registry) Semver(1, 3, 0) EIP1271Verifier("EAS", "1.3.0") {
-        //         if (address(registry) == address(0)) {
-        //             revert InvalidRegistry();
-        //         }
+    fn constructor(ref self: ContractState) {}
+    // #[constructor]
+    // fn constructor(ref self: ContractState, registry: ContractAddress) {
+    //     //     /// @dev Creates a new EAS instance.
+    //     //     /// @param registry The address of the global schema registry.
+    //     //     constructor(ISchemaRegistry registry) Semver(1, 3, 0) EIP1271Verifier("EAS", "1.3.0") {
+    //     //         if (address(registry) == address(0)) {
+    //     //             revert InvalidRegistry();
+    //     //         }
 
-        self._schemaRegistry.write(registry);
-    //     }
-    }
+    //     self._schemaRegistry.write(registry);
+    // //     }
+    // }
 
     #[event]
     #[derive(Drop, starknet::Event)]
