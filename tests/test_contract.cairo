@@ -16,7 +16,7 @@ fn deploy_contract(name: felt252) -> ContractAddress {
 
 #[test]
 // #[ignore()]
-fn test_increase_balance() {
+fn test_schema_registry() {
     let contract_address = deploy_contract('SchemaRegistry');
 
     let safe_dispatcher = ISchemaRegistrySafeDispatcher { contract_address };

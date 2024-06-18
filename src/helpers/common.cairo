@@ -14,15 +14,32 @@ mod Errors {
     const InvalidSignature: felt252 = 'InvalidSignature';
     const NotFound: felt252 = 'NotFound';
     const AlreadyExists: felt252 = 'AlreadyExists';
+    const AlreadyRevoked: felt252 = 'AlreadyRevoked';
+    const AlreadyRevokedOffchain: felt252 = 'AlreadyRevokedOffchain';
+    const AlreadyTimestamped: felt252 = 'AlreadyTimestamped';
+    const InsufficientValue: felt252 = 'InsufficientValue';
+    const InvalidAttestation: felt252 = 'InvalidAttestation';
+    const InvalidAttestations: felt252 = 'InvalidAttestations';
+    const InvalidExpirationTime: felt252 = 'InvalidExpirationTime';
+    const InvalidOffset: felt252 = 'InvalidOffset';
+    const InvalidRegistry: felt252 = 'InvalidRegistry';
+    const InvalidRevocation: felt252 = 'InvalidRevocation';
+    const InvalidRevocations: felt252 = 'InvalidRevocations';
+    const InvalidSchema: felt252 = 'InvalidSchema';
+    const InvalidVerifier: felt252 = 'InvalidVerifier';
+    const Irrevocable: felt252 = 'Irrevocable';
+    const NotPayable: felt252 = 'NotPayable';
+    const WrongSchema: felt252 = 'WrongSchema';
+
 }
 
-// /// @notice A struct representing ECDSA signature data.
-// #[derive(Copy, Drop, Serde)]
-// struct Signature {
-// //     uint8 v; // The recovery ID.
-// //     bytes32 r; // The x-coordinate of the nonce R.
-// //     bytes32 s; // The signature data.
-// }
+/// @notice A struct representing ECDSA signature data.
+#[derive(Copy, Drop, Serde)]
+struct Signature {
+//     uint8 v; // The recovery ID.
+//     bytes32 r; // The x-coordinate of the nonce R.
+//     bytes32 s; // The signature data.
+}
 
 // /// @notice A struct representing a single attestation.
 // struct Attestation {
@@ -37,7 +54,7 @@ mod Errors {
 //     bool revocable; // Whether the attestation is revocable.
 //     bytes data; // Custom attestation data.
 // }
-#[derive(Copy, Drop, Serde)]
+#[derive(Copy, Drop, Serde, starknet::Store)]
 struct Attestation {
     uid: u256,
     schema: felt252, // string

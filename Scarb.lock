@@ -5,8 +5,14 @@ version = 1
 name = "attestme"
 version = "0.1.0"
 dependencies = [
+ "openzeppelin",
  "snforge_std",
 ]
+
+[[package]]
+name = "openzeppelin"
+version = "0.8.0-beta.0"
+source = "git+https://github.com/OpenZeppelin/cairo-contracts.git?tag=v0.8.0-beta.0#9a51acae41aff9223eb3eb888f164cce8e77b497"
 
 [[package]]
 name = "snforge_std"
