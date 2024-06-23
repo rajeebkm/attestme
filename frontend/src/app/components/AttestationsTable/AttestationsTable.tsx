@@ -1,83 +1,80 @@
 "use client"
 import { useEffect, useState } from "react";
 import { Contract, RpcProvider } from "starknet";
-import { SCHEMA_REGISTRY } from "@/app/utils/constant";
-import SchemRegistryAbi from "@/app/abi/schemaRegistry.abi.json";
+import { SAS } from "@/app/utils/constant";
+import AttestationAbi from "@/app/abi/attestation.abi.json";
 import Link from "next/link";
 import { useRouter } from 'next/navigation';
 import { FiCopy } from "react-icons/fi"; 
 import toast from "react-hot-toast";
+import { useAccount,useContractRead } from "@starknet-react/core";
 
-interface Schema {
+interface Attestation {
     uid: string;
-    txhash: string;
     from: string;
     to: string;
     type: string;
+    age:number;
 }
 
 function AttestationsTable() {
-    const [schemas, setSchemas] = useState<Schema[]>([]);
+    const { account, isConnected } = useAccount();
+    const [attestationUID,setAttestationUID] = useState('');
+    const [attestation, setSAttestation] = useState<Attestation[]>([]);
     const [loading, setLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 4; 
     const router = useRouter();
 
-    useEffect(() => {
-        const fetchSchemas = async () => {
-            const provider = new RpcProvider({ nodeUrl: "https://starknet-sepolia.g.alchemy.com/v2/pZMHvd5KDFdzplptGEsyXYptNTM5Vzyr" });
-            const contract = new Contract(SchemRegistryAbi, SCHEMA_REGISTRY, provider);
+    const {
+        data: allAttestationData,
+        isLoading: allAttestationLoading,
+        error: allAttestationError,
+        refetch: refetchAllAttestation
+    } = useContractRead({
+        address: SAS,
+        abi: AttestationAbi,
+        functionName: "getAllAttestations",
+        watch: false,
+    });
 
-            const sampleSchemas: Schema[] = [
-                {
-                    uid: "1",
-                    txhash: "0x0529a5a0b62574731f779542481172d87fd594d346785e1e6fc7f5a6e5ca4b6c",
-                    from: "0x123456789788778abcdef",
-                    to: "0x1234567890abcdef",
+    const fetchAttestations = async () => {
+        try {
+            setLoading(true);
+            const result = await refetchAllAttestation();
+        
+            if (result && result.data ) {
+                const parsedData: any = result.data;
+                console.log("parsedData: ",parsedData);
+
+                const attestationData: Attestation[] = parsedData.map((item: any, index: number) => ({
+                    uid: `0x${item.uid.toString(16)}`,
+                    from: `0x${item.attester.toString(16)}`,
+                    to: `0x${item.recipient.toString(16)}`,
                     type: "onchain",
-                },
-                {
-                    uid: "2",
-                    txhash: "0x0529a5a0b62574731f779542481172d87fd594d346785e1e6fc7f5a6e5ca4b6c",
-                    from: "0x1234567890abcdef",
-                    to: "0x12345678907887877abcdef",
-                    type: "onchain",
-                },
-                {
-                    uid: "3",
-                    txhash: "0x0529a5a0b62574731f779542481172d87fd594d346785e1e6fc7f5a6e5ca4b6c",
-                    from: "0x1234567890abcdef",
-                    to: "0x12345678908787abcdef",
-                    type: "onchain",
-                },
-                {
-                    uid: "4",
-                    txhash: "0x0529a5a0b62574731f779542481172d87fd594d346785e1e6fc7f5a6e5ca4b6d",
-                    from: "0x1234567767867890abcdef",
-                    to: "0x1234567890abcdef",
-                    type: "onchain",
-                },
-                {
-                    uid: "5",
-                    txhash: "0x0529a5a0b62574731f779542481172d87fd594d346785e1e6fc7f5a6e5ca4b6e",
-                    from: "0x123456789786678670abcdef",
-                    to: "0x123456789870abcdef",
-                    type: "onchain",
-                },
-            ];
-            setSchemas(sampleSchemas);
+                    age: item.time.toString()
+                })
+                );
+                setSAttestation(attestationData);
+                setLoading(false);
+            }
+        } catch (error) {
             setLoading(false);
-        };
+            toast.error("Failed to fetch attestation details. Please try again.");
+            console.error("Error fetching attestation details:", error);
+        }
+    }
 
-        fetchSchemas();
-    }, []);
+    useEffect(() => {
+        fetchAttestations();
+    }, [isConnected, account]);
 
     const truncateTxHash = (txhash: string) => {
-        return `${txhash.slice(0, 8)}...${txhash.slice(-5)}`;
+        return `${txhash.slice(0, 6)}...${txhash.slice(-5)}`;
     };
 
     const handleNextPage = () => {
-        if (currentPage < Math.ceil(schemas.length / itemsPerPage)) {
+        if (currentPage < Math.ceil(attestation.length / itemsPerPage)) {
             setCurrentPage(currentPage + 1);
         }
     };
@@ -98,7 +95,7 @@ function AttestationsTable() {
 
     const indexOfLastItem = currentPage * itemsPerPage;
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-    const currentSchemas = schemas.slice(indexOfFirstItem, indexOfLastItem);
+    const currentAttestation = attestation.slice(indexOfFirstItem, indexOfLastItem);
 
     return (
         <div className="flex flex-col font-serif items-center justify-center w-full min-h-screen bg-gradient-to-b from-blue-100 to-blue-300 dark:from-gray-800 dark:to-gray-900 py-12 px-4">
@@ -126,30 +123,31 @@ function AttestationsTable() {
                             <thead>
                                 <tr>
                                     <th className="border-b p-4 text-gray-800 dark:text-gray-200">UID</th>
-                                    <th className="border-b p-4 text-gray-800 dark:text-gray-200">TxnHash</th>
                                     <th className="border-b p-4 text-gray-800 dark:text-gray-200">From</th>
                                     <th className="border-b p-4 text-gray-800 dark:text-gray-200">To</th>
                                     <th className="border-b p-4 text-gray-800 dark:text-gray-200">Type</th>
+                                    <th className="border-b p-4 text-gray-800 dark:text-gray-200">Age</th>
                                     <th className="border-b p-4 text-gray-800 dark:text-gray-200">Action</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {currentSchemas.map((schema) => (
-                                    <tr key={schema.uid}>
+                                {currentAttestation.map((attestations) => (
+                                    <tr key={attestations.uid}>
                                         <td className="border-b p-4 text-gray-800 dark:text-gray-200 flex items-center">
-                                            #{schema.uid} 
+                                            {truncateTxHash(attestations.uid)} 
                                             <FiCopy 
                                                 className="ml-2 text-blue-600 cursor-pointer"
-                                                onClick={() => handleCopy(schema.uid)} 
+                                                onClick={() => handleCopy(attestations.uid)} 
                                             />
                                         </td>
-                                        <td className="border-b p-4 text-gray-800 dark:text-gray-200">{truncateTxHash(schema.txhash)}</td>
-                                        <td className="border-b p-4 text-gray-800 dark:text-gray-200">{schema.from}</td>
-                                        <td className="border-b p-4 text-gray-800 dark:text-gray-200">{schema.to}</td>
-                                        <td className="border-b p-4 text-gray-800 dark:text-gray-200">{schema.type}</td>
+                                        
+                                        <td className="border-b p-4 text-gray-800 dark:text-gray-200">{truncateTxHash(attestations.from)}</td>
+                                        <td className="border-b p-4 text-gray-800 dark:text-gray-200">{truncateTxHash(attestations.to)}</td>
+                                        <td className="border-b p-4 text-gray-800 dark:text-gray-200">{attestations.type}</td>
+                                        <td className="border-b p-4 text-gray-800 dark:text-gray-200">{attestations.age}</td>
                                         <td className="border-b p-4 text-gray-800 dark:text-gray-200">
-                                            <Link href={`https://sepolia.starkscan.co/tx/${schema.txhash}`} legacyBehavior>
-                                                <a className="text-blue-600 hover:underline">View Details</a>
+                                            <Link href="/attestations-view" legacyBehavior>
+                                                <a className="text-blue-600 hover:underline">View Attestation</a>
                                             </Link>
                                         </td>
                                     </tr>
@@ -169,7 +167,7 @@ function AttestationsTable() {
                                 type="button"
                                 className="bg-blue-600 py-2 px-4 rounded text-white hover:bg-blue-700 disabled:bg-gray-500 disabled:cursor-not-allowed"
                                 onClick={handleNextPage}
-                                disabled={currentPage === Math.ceil(schemas.length / itemsPerPage)}
+                                disabled={currentPage === Math.ceil(attestation.length / itemsPerPage)}
                             >
                                 Next
                             </button>

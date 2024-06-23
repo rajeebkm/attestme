@@ -11,13 +11,10 @@ import { toast } from 'react-hot-toast';
 
 interface Schema {
     uid: string;
-    txhash: string;
-    schema: string;
+    revocable: string;
     resolver: string;
     attestations: number;
 }
-
-
 
 function SchemasTable() {
     const { account, isConnected } = useAccount();
@@ -40,56 +37,36 @@ function SchemasTable() {
         watch: false,
     });
 
-    const {
-        data: schemaData,
-        isLoading: schemaLoading,
-        error: schemaError,
-        refetch: refetchSchema
-    } = useContractRead({
-        address: SCHEMA_REGISTRY,
-        abi: SchemRegistryAbi,
-        functionName: "get_schema",
-        args: [schemaUID],
-        watch: false,
-    });
+    // const {
+    //     data: schemaData,
+    //     isLoading: schemaLoading,
+    //     error: schemaError,
+    //     refetch: refetchSchema
+    // } = useContractRead({
+    //     address: SCHEMA_REGISTRY,
+    //     abi: SchemRegistryAbi,
+    //     functionName: "get_schema",
+    //     args: [schemaUID],
+    //     watch: false,
+    // });
    
     const fetchSchemas = async () => {
         try {
             setLoading(true);
-            // if (!isConnected || !account) {
-            //     toast.error("Connect wallet to continue");
-            //     return;
-            // }
             const result = await refetchAllSchemas();
-            // const result1 =await refetchSchema();
-
-
+            
             if (result && result.data ) {
                 const parsedData: any = result.data;
                 console.log("parsedData: ",parsedData);
-                const sampleSchemas: Schema[] = parsedData.map((item: any, index: number) => ({
+                const schemasData: Schema[] = parsedData.map((item: any, index: number) => ({
                     uid: `0x${item.uid.toString(16)}`,
-                    txhash: item.txhash || `0x${(Math.random() * 1e64).toString(16).padStart(64, '0')}`,
-                    schema: item.schema || `Schema ${index + 1}`,
+                    revocable: item.revocable.toString(),
                     resolver: `0x${item.resolver.toString(16)}`,
                     attestations: item.attestations || Math.floor(Math.random() * 10) + 1,
                 })
                 );
                 
-                setSchemaUID(sampleSchemas[0].uid);
-                console.log("state",schemaUID);
-                const result1 =await refetchSchema();
-                console.log("Result1: ",result1);
-                const sampleSchemas1: Schema[] = parsedData.map((item: any, index: number) => ({
-                    uid: `0x${item.uid.toString(16)}`,
-                    txhash: item.txhash || `0x${(Math.random() * 1e64).toString(16).padStart(64, '0')}`,
-                    schema: result1 || `Schema ${index + 1}`,
-                    resolver: `0x${item.resolver.toString(16)}`,
-                    attestations: item.attestations || Math.floor(Math.random() * 10) + 1,
-                })
-                );
-                
-                setSchemas(sampleSchemas);
+                setSchemas(schemasData);
                 setLoading(false);
             }
         } catch (error) {
@@ -157,9 +134,8 @@ function SchemasTable() {
                             <thead>
                                 <tr>
                                     <th className="border-b p-4 text-gray-800 dark:text-gray-200">UID</th>
-                                    <th className="border-b p-4 text-gray-800 dark:text-gray-200">TxnHash</th>
-                                    <th className="border-b p-4 text-gray-800 dark:text-gray-200">Schema</th>
                                     <th className="border-b p-4 text-gray-800 dark:text-gray-200">Resolver</th>
+                                    <th className="border-b p-4 text-gray-800 dark:text-gray-200">Revocable</th>
                                     <th className="border-b p-4 text-gray-800 dark:text-gray-200">Attestations</th>
                                     <th className="border-b p-4 text-gray-800 dark:text-gray-200">Action</th>
                                 </tr>
@@ -174,13 +150,13 @@ function SchemasTable() {
                                                 onClick={() => handleCopy(schema.uid)}
                                             />
                                         </td>
-                                        <td className="border-b p-4 text-gray-800 dark:text-gray-200">{truncateTxHash(schema.txhash)}</td>
-                                        <td className="border-b p-4 text-gray-800 dark:text-gray-200">{schema.schema}</td>
+                                        
                                         <td className="border-b p-4 text-gray-800 dark:text-gray-200">{truncateTxHash(schema.resolver)}</td>
+                                        <td className="border-b p-4 text-gray-800 dark:text-gray-200">{schema.revocable}</td>
                                         <td className="border-b p-4 text-gray-800 dark:text-gray-200">{schema.attestations}</td>
                                         <td className="border-b p-4 text-gray-800 dark:text-gray-200">
-                                            <Link href={`https://sepolia.starkscan.co/tx/${schema.txhash}`} legacyBehavior>
-                                                <a className="text-blue-600 hover:underline">View Details</a>
+                                            <Link href='/schemas-view' legacyBehavior>
+                                                <a className="text-blue-600 hover:underline">View Schema</a>
                                             </Link>
                                         </td>
                                     </tr>
