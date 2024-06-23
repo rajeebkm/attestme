@@ -1,12 +1,12 @@
 [
   {
-    "name": "SchemaRegistryImpl",
     "type": "impl",
+    "name": "SchemaRegistryImpl",
     "interface_name": "attestme::schema_registry::ISchemaRegistry"
   },
   {
-    "name": "core::byte_array::ByteArray",
     "type": "struct",
+    "name": "core::byte_array::ByteArray",
     "members": [
       {
         "name": "data",
@@ -23,8 +23,8 @@
     ]
   },
   {
-    "name": "core::bool",
     "type": "enum",
+    "name": "core::bool",
     "variants": [
       {
         "name": "False",
@@ -37,8 +37,8 @@
     ]
   },
   {
-    "name": "core::integer::u256",
     "type": "struct",
+    "name": "core::integer::u256",
     "members": [
       {
         "name": "low",
@@ -51,8 +51,8 @@
     ]
   },
   {
-    "name": "attestme::schema_registry::SchemaRecord",
     "type": "struct",
+    "name": "attestme::schema_registry::SchemaRecord",
     "members": [
       {
         "name": "uid",
@@ -69,12 +69,12 @@
     ]
   },
   {
-    "name": "attestme::schema_registry::ISchemaRegistry",
     "type": "interface",
+    "name": "attestme::schema_registry::ISchemaRegistry",
     "items": [
       {
-        "name": "register",
         "type": "function",
+        "name": "register",
         "inputs": [
           {
             "name": "schema",
@@ -97,8 +97,8 @@
         "state_mutability": "external"
       },
       {
-        "name": "get_schema",
         "type": "function",
+        "name": "get_schema",
         "inputs": [
           {
             "name": "uid",
@@ -113,8 +113,8 @@
         "state_mutability": "view"
       },
       {
-        "name": "get_all_uids",
         "type": "function",
+        "name": "get_all_uids",
         "inputs": [],
         "outputs": [
           {
@@ -124,8 +124,8 @@
         "state_mutability": "view"
       },
       {
-        "name": "get_all_schemas_records",
         "type": "function",
+        "name": "get_all_schemas_records",
         "inputs": [],
         "outputs": [
           {
@@ -137,51 +137,51 @@
     ]
   },
   {
-    "name": "constructor",
     "type": "constructor",
+    "name": "constructor",
     "inputs": []
   },
   {
-    "kind": "struct",
-    "name": "attestme::schema_registry::SchemaRegistry::Registered",
     "type": "event",
+    "name": "attestme::schema_registry::SchemaRegistry::Registered",
+    "kind": "struct",
     "members": [
       {
-        "kind": "data",
         "name": "timestamp",
-        "type": "core::integer::u64"
+        "type": "core::integer::u64",
+        "kind": "data"
       },
       {
-        "kind": "data",
         "name": "uid",
-        "type": "core::integer::u256"
+        "type": "core::integer::u256",
+        "kind": "data"
       },
       {
-        "kind": "data",
         "name": "registerer",
-        "type": "core::starknet::contract_address::ContractAddress"
+        "type": "core::starknet::contract_address::ContractAddress",
+        "kind": "data"
       },
       {
-        "kind": "data",
         "name": "schemaRecord",
-        "type": "attestme::schema_registry::SchemaRecord"
+        "type": "attestme::schema_registry::SchemaRecord",
+        "kind": "data"
       },
       {
-        "kind": "data",
         "name": "schema",
-        "type": "core::byte_array::ByteArray"
+        "type": "core::byte_array::ByteArray",
+        "kind": "data"
       }
     ]
   },
   {
-    "kind": "enum",
-    "name": "attestme::schema_registry::SchemaRegistry::Event",
     "type": "event",
+    "name": "attestme::schema_registry::SchemaRegistry::Event",
+    "kind": "enum",
     "variants": [
       {
-        "kind": "nested",
         "name": "Registered",
-        "type": "attestme::schema_registry::SchemaRegistry::Registered"
+        "type": "attestme::schema_registry::SchemaRegistry::Registered",
+        "kind": "nested"
       }
     ]
   }
