@@ -9,7 +9,9 @@ use alexandria_storage::{List, ListTrait};
 pub struct SchemaRecord {
     pub uid: u256, // The unique identifier of the schema.
     pub resolver: ContractAddress, // Optional schema resolver. // ISchemaResolver
-    pub revocable: bool // Whether the schema allows revocations explicitly.
+    pub revocable: bool, // Whether the schema allows revocations explicitly.
+    pub creator: ContractAddress,
+    pub createdAt: u64
 }
 
 #[starknet::interface]
@@ -71,7 +73,8 @@ mod SchemaRegistry {
             ref self: ContractState, schema: ByteArray, resolver: ContractAddress, revocable: bool
         ) -> u256 {
             let mut _schemaRecord: SchemaRecord = SchemaRecord {
-                uid: EMPTY_UID, resolver: resolver, revocable: revocable
+                uid: EMPTY_UID, resolver: resolver, revocable: revocable, creator: get_caller_address(),
+                createdAt: get_block_timestamp()
             };
             let schema_ = schema.clone();
             let schema_clone = schema.clone();
