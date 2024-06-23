@@ -2,6 +2,8 @@
 
 use starknet::{ContractAddress, contract_address_const, get_caller_address, get_block_timestamp};
 use core::keccak::keccak_u256s_be_inputs;
+use alexandria_storage::{List, ListTrait};
+
 
 /// @notice A struct representing the full arguments of the attestation request.
 #[derive(Drop, Serde)]
@@ -30,17 +32,17 @@ pub struct AttestationRequestData {
 
 #[derive(Drop, Serde, starknet::Store)]
 pub struct Attestation {
-    uid: u256,
-    schema: u256, // string
-    time: u64,
-    expirationTime: u64,
-    revocationTime: u64,
-    refUID: u256,
-    recipient: ContractAddress,
-    attester: ContractAddress,
-    data: ByteArray,
-    revocable: bool,
-    isRevoked: bool
+    pub uid: u256,
+    pub schema: u256, // string
+    pub time: u64,
+    pub expirationTime: u64,
+    pub revocationTime: u64,
+    pub refUID: u256,
+    pub recipient: ContractAddress,
+    pub attester: ContractAddress,
+    pub data: ByteArray,
+    pub revocable: bool,
+    pub isRevoked: bool
 }
 
 /// @notice A struct representing the arguments of the revocation request.
@@ -189,7 +191,7 @@ mod SAS {
         ISchemaRegistryDispatcherTrait, EMPTY_UID, NO_EXPIRATION_TIME, get_block_timestamp,
         keccak_u256s_be_inputs, NotFound, AttestationsResult, NotPayable, InsufficientValue,
         InvalidAttestation, InvalidRevocation, RevocationRequest, RevocationRequestData,
-        AccessDenied, AlreadyRevoked, AlreadyTimestamped
+        AccessDenied, AlreadyRevoked, AlreadyTimestamped, List, ListTrait
     };
     #[storage]
     struct Storage {
@@ -202,10 +204,11 @@ mod SAS {
         _timestamps: LegacyMap::<
             u256, u64
         >, // The global mapping between data and their timestamps.
-        _revocationsOffchain: LegacyMap::<
-            (ContractAddress, u256), u64
-        >, // The global mapping between data and their revocation timestamps.
-        _noOfAttestation: LegacyMap::<u256, u256>
+        // _revocationsOffchain: LegacyMap::<
+        //     (ContractAddress, u256), u64
+        // >, // The global mapping between data and their revocation timestamps.
+        _noOfAttestation: LegacyMap::<u256, u256>,
+        _all_attestation_uids: List<u256>
     }
 
     /// @dev Creates a new EAS instance.
@@ -225,7 +228,7 @@ mod SAS {
         Attested: Attested,
         Revoked: Revoked,
         Timestamped: Timestamped,
-        RevokedOffchain: RevokedOffchain
+        // RevokedOffchain: RevokedOffchain
     }
 
     /// @notice Emitted when an attestation has been made.
@@ -276,15 +279,15 @@ mod SAS {
     /// @param revoker The address of the revoker.
     /// @param data The data.
     /// @param timestamp The timestamp.
-    #[derive(Drop, starknet::Event)]
-    struct RevokedOffchain {
-        // #[key]
-        revoker: ContractAddress, // bytes32
-        // #[key]
-        timestamp: u64,
-        data: u256,
-    // #[key]
-    }
+    // #[derive(Drop, starknet::Event)]
+    // struct RevokedOffchain {
+    //     // #[key]
+    //     revoker: ContractAddress, // bytes32
+    //     // #[key]
+    //     timestamp: u64,
+    //     data: u256,
+    // // #[key]
+    // }
 
     #[abi(embed_v0)]
     impl SASImpl of super::ISAS<ContractState> {
@@ -300,6 +303,9 @@ mod SAS {
             let mut _attestationRequestData: AttestationRequestData = request.data;
             let mut _attestationsResult: AttestationsResult = self
                 ._attest(request.schema, _attestationRequestData, get_caller_address(), 0, true);
+            let mut _all_attestation_uids: List<u256> = self._all_attestation_uids.read();
+            _all_attestation_uids.append(_attestationsResult.uids).unwrap();
+            self._all_attestation_uids.write(_all_attestation_uids);
             return _attestationsResult.uids;
         }
         /// @notice Attests to a specific schema via the provided ECDSA signature.
@@ -432,16 +438,13 @@ mod SAS {
 
         fn getAllAttestations(self: @ContractState) -> Array<Attestation> {
             let mut _allAttestations: Array<Attestation> = ArrayTrait::new();
-            let _getAllUids: Array<u256> = ISchemaRegistryDispatcher {
-                contract_address: self._schemaRegistry.read()
-            }
-                .get_all_uids();
+            let _getAllAttestationUids: List<u256> = self._all_attestation_uids.read();
             let mut i: u32 = 0;
             loop {
-                let _attestation: Attestation = self.getAttestation(*_getAllUids.at(i));
+                let _attestation: Attestation = self._db.read(_getAllAttestationUids[i]);
                 _allAttestations.append(_attestation);
                 i += 1;
-                if (i == _getAllUids.len()) {
+                if (i == _getAllAttestationUids.len()) {
                     break;
                 }
             };

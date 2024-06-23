@@ -15,7 +15,7 @@ use attestme::SAS::ISASSafeDispatcher;
 use attestme::SAS::ISASSafeDispatcherTrait;
 use attestme::SAS::ISASDispatcher;
 use attestme::SAS::ISASDispatcherTrait;
-use attestme::SAS::{AttestationRequest, AttestationRequestData};
+use attestme::SAS::{AttestationRequest, AttestationRequestData, Attestation};
 
 fn deploy_contract_schema_registry(name: ByteArray) -> ContractAddress {
     let contract = declare(name).unwrap();
@@ -112,10 +112,10 @@ fn test_sas() {
         schema: _uid, data: _attestationRequestData
     };
     let attestUID: u256 = dispatcher_sas.attest(_attestationRequest);
-    println!("attestUID {}", attestUID);
+    println!("attestUID 1: {}", attestUID);
 
     let noOfAttestation: u256 = dispatcher_sas.getNoOfAttestation(_uid);
-    println!("noOfAttestation {}", noOfAttestation);
+    println!("noOfAttestation: {}", noOfAttestation);
 
     start_cheat_caller_address(contract_address_sas, contract_address_const::<3>());
 
@@ -130,13 +130,21 @@ fn test_sas() {
     let _attestationRequest: AttestationRequest = AttestationRequest {
         schema: _uid, data: _attestationRequestData
     };
-    let attestUID: u256 = dispatcher_sas.attest(_attestationRequest);
-    println!("attestUID {}", attestUID);
+    let attestUID2: u256 = dispatcher_sas.attest(_attestationRequest);
+    println!("attestUID 2: {}", attestUID2);
 
     stop_cheat_caller_address(contract_address_sas);
 
     let noOfAttestation: u256 = dispatcher_sas.getNoOfAttestation(_uid);
-    println!("noOfAttestation {}", noOfAttestation);
-// assert(_schemaRecord.uid == _uid, 'Invalid uid');
+    println!("noOfAttestation: {}", noOfAttestation);
+    let _attestation: Attestation = dispatcher_sas.getAttestation(attestUID);
+    println!("attestUID 1: {}", _attestation.uid);
+
+    let _attestation: Attestation = dispatcher_sas.getAttestation(attestUID2);
+    println!("attestUID 2: {}", _attestation.uid);
+
+    let _allAttestation: Array<Attestation> = dispatcher_sas.getAllAttestations();
+    println!("attestUID 1: {}", *_allAttestation.at(0).uid);
+    println!("attestUID 2: {}", *_allAttestation.at(1).uid);
 
 }
