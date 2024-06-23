@@ -3,7 +3,7 @@ use attestme::interfaces::ISchemaResolver;
 
 /// @notice A struct representing a record for a submitted schema.
 #[derive(Copy, Drop, Serde, starknet::Store)]
-struct SchemaRecord {
+pub struct SchemaRecord {
     uid: felt252, // The unique identifier of the schema.
     schema: felt252, // Custom specification of the schema (e.g., an ABI). // string
     resolver: ContractAddress, // Optional schema resolver. // ISchemaResolver

@@ -1,41 +1,41 @@
 use starknet::ContractAddress;
 
 // A representation of an empty/uninitialized UID.
-const EMPTY_UID: u128 = 0;
+pub const EMPTY_UID: u256 = 0;
 
 // A zero expiration represents an non-expiring attestation.
-const NO_EXPIRATION_TIME: felt252 = 0;
+pub const NO_EXPIRATION_TIME: u64 = 0;
 
-mod Errors {
-    const AccessDenied: felt252 = 'AccessDenied';
-    const DeadlineExpired: felt252 = 'DeadlineExpired';
-    const InvalidEAS: felt252 = 'InvalidEAS';
-    const InvalidLength: felt252 = 'InvalidLength';
-    const InvalidSignature: felt252 = 'InvalidSignature';
-    const NotFound: felt252 = 'NotFound';
-    const AlreadyExists: felt252 = 'AlreadyExists';
-    const AlreadyRevoked: felt252 = 'AlreadyRevoked';
-    const AlreadyRevokedOffchain: felt252 = 'AlreadyRevokedOffchain';
-    const AlreadyTimestamped: felt252 = 'AlreadyTimestamped';
-    const InsufficientValue: felt252 = 'InsufficientValue';
-    const InvalidAttestation: felt252 = 'InvalidAttestation';
-    const InvalidAttestations: felt252 = 'InvalidAttestations';
-    const InvalidExpirationTime: felt252 = 'InvalidExpirationTime';
-    const InvalidOffset: felt252 = 'InvalidOffset';
-    const InvalidRegistry: felt252 = 'InvalidRegistry';
-    const InvalidRevocation: felt252 = 'InvalidRevocation';
-    const InvalidRevocations: felt252 = 'InvalidRevocations';
-    const InvalidSchema: felt252 = 'InvalidSchema';
-    const InvalidVerifier: felt252 = 'InvalidVerifier';
-    const Irrevocable: felt252 = 'Irrevocable';
-    const NotPayable: felt252 = 'NotPayable';
-    const WrongSchema: felt252 = 'WrongSchema';
+pub mod Errors {
+    pub const AccessDenied: felt252 = 'AccessDenied';
+    pub const DeadlineExpired: felt252 = 'DeadlineExpired';
+    pub const InvalidEAS: felt252 = 'InvalidEAS';
+    pub const InvalidLength: felt252 = 'InvalidLength';
+    pub const InvalidSignature: felt252 = 'InvalidSignature';
+    pub const NotFound: felt252 = 'NotFound';
+    pub const AlreadyExists: felt252 = 'AlreadyExists';
+    pub const AlreadyRevoked: felt252 = 'AlreadyRevoked';
+    pub const AlreadyRevokedOffchain: felt252 = 'AlreadyRevokedOffchain';
+    pub const AlreadyTimestamped: felt252 = 'AlreadyTimestamped';
+    pub const InsufficientValue: felt252 = 'InsufficientValue';
+    pub const InvalidAttestation: felt252 = 'InvalidAttestation';
+    pub const InvalidAttestations: felt252 = 'InvalidAttestations';
+    pub const InvalidExpirationTime: felt252 = 'InvalidExpirationTime';
+    pub const InvalidOffset: felt252 = 'InvalidOffset';
+    pub const InvalidRegistry: felt252 = 'InvalidRegistry';
+    pub const InvalidRevocation: felt252 = 'InvalidRevocation';
+    pub const InvalidRevocations: felt252 = 'InvalidRevocations';
+    pub const InvalidSchema: felt252 = 'InvalidSchema';
+    pub const InvalidVerifier: felt252 = 'InvalidVerifier';
+    pub const Irrevocable: felt252 = 'Irrevocable';
+    pub const NotPayable: felt252 = 'NotPayable';
+    pub const WrongSchema: felt252 = 'WrongSchema';
 
 }
 
 /// @notice A struct representing ECDSA signature data.
 #[derive(Copy, Drop, Serde)]
-struct Signature {
+pub struct Signature {
 //     uint8 v; // The recovery ID.
 //     bytes32 r; // The x-coordinate of the nonce R.
 //     bytes32 s; // The signature data.
@@ -55,12 +55,12 @@ struct Signature {
 //     bytes data; // Custom attestation data.
 // }
 #[derive(Copy, Drop, Serde, starknet::Store)]
-struct Attestation {
+pub struct Attestation {
     uid: u256,
-    schema: felt252, // string
+    schema: u256, // string
     time: u64, // IResolver
     expirationTime: u64,
-    refUID: felt252,
+    refUID: u256,
     recipient: ContractAddress,
     attester: ContractAddress,
     revocable: bool,

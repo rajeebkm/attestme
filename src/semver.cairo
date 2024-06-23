@@ -30,7 +30,7 @@ mod Semver {
         self.patch.write(_patch);
     }
 
-    #[external(v0)]
+    #[abi(embed_v0)]
     impl SemverImpl of ISemver<ContractState> {
         /// @notice Returns the full semver contract version.
         /// @return Semver contract version as a string.
