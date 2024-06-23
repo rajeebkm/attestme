@@ -1,5 +1,6 @@
-mod schema_registry;
-mod semver;
+pub mod schema_registry;
+pub mod semver;
 mod helpers;
 mod interfaces;
-mod SAS;
+pub mod SAS;
+pub mod resolver;
