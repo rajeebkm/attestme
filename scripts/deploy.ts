@@ -41,9 +41,9 @@ async function main(classHash: string) {
     console.log('✅ Test Contract connected at =', myTestContract.address);
 }
 
-// const classHash = "0x48e323ae4da6ee2ad8e8a7f5a103feca28681b1086b6a7f5a39c8b9e3e6af46"; // SchemaRegistry
-const classHash = "0x6f1028982c6fc789c3695383adcaf8256e3639b5a631f2fbb7caa5cac3f6f4d"; // SAS
-main(classHash)
+// const classHash_SchemaRegistry = "0x48e323ae4da6ee2ad8e8a7f5a103feca28681b1086b6a7f5a39c8b9e3e6af46"; // SchemaRegistry
+const classHash_SAS = "0x18cdcbee521e009d6c1dc68deefb25a70d7e4c45e5dcbbe8346c63af1eb5e25"; // SAS
+main(classHash_SAS)
     .then(() => process.exit(0))
     .catch((error) => {
         console.error(error);

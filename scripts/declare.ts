@@ -26,8 +26,8 @@ async function main(contract_name: string) {
     console.log('✅ Contract Class Hash completed.');
 }
 
-const contract_name = "SchemaRegistry";
-// const contract_name = "SAS";
+// const contract_name = "SchemaRegistry";
+const contract_name = "SAS";
 main(contract_name)
     .then(() => process.exit(0))
     .catch((error) => {
