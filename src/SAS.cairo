@@ -39,7 +39,8 @@ pub struct Attestation {
     recipient: ContractAddress,
     attester: ContractAddress,
     data: ByteArray,
-    revocable: bool
+    revocable: bool,
+    isRevoked: bool
 }
 
 /// @notice A struct representing the arguments of the revocation request.
@@ -136,20 +137,24 @@ pub trait ISAS<TContractState> {
     /// @return The timestamp the data was timestamped with.
     fn multiTimestamp(ref self: TContractState, data: Array<u256>) -> u64;
 
-    /// @notice Revokes the specified bytes32 data.
-    /// @param data The data to timestamp.
-    /// @return The timestamp the data was revoked with.
-    fn revokeOffchain(ref self: TContractState, data: felt252) -> u64;
+    // /// @notice Revokes the specified bytes32 data.
+    // /// @param data The data to timestamp.
+    // /// @return The timestamp the data was revoked with.
+    // fn revokeOffchain(ref self: TContractState, data: felt252) -> u64;
 
-    /// @notice Revokes the specified multiple bytes32 data.
-    /// @param data The data to timestamp.
-    /// @return The timestamp the data was revoked with.
-    fn multiRevokeOffchain(ref self: TContractState, data: Array<felt252>) -> u64;
+    // /// @notice Revokes the specified multiple bytes32 data.
+    // /// @param data The data to timestamp.
+    // /// @return The timestamp the data was revoked with.
+    // fn multiRevokeOffchain(ref self: TContractState, data: Array<felt252>) -> u64;
 
     /// @notice Returns an existing attestation by UID.
     /// @param uid The UID of the attestation to retrieve.
     /// @return The attestation data members.
     fn getAttestation(self: @TContractState, uid: u256) -> Attestation;
+
+    /// @notice Returns all existing attestation.
+    /// @return The attestation data members.
+    fn getAllAttestations(self: @TContractState) -> Array<Attestation>;
 
     /// @notice Checks whether an attestation exists.
     /// @param uid The UID of the attestation to retrieve.
@@ -164,7 +169,7 @@ pub trait ISAS<TContractState> {
     /// @notice Returns the timestamp that the specified data was timestamped with.
     /// @param data The data to query.
     /// @return The timestamp the data was timestamped with.
-    fn getRevokeOffchain(self: @TContractState, revoker: ContractAddress, data: u256) -> u64;
+    // fn getRevokeOffchain(self: @TContractState, revoker: ContractAddress, data: u256) -> u64;
     fn getNoOfAttestation(self: @TContractState, schemaUID: u256) -> u256;
 }
 
@@ -371,16 +376,16 @@ mod SAS {
         /// @notice Revokes the specified bytes32 data.
         /// @param data The data to timestamp.
         /// @return The timestamp the data was revoked with.
-        fn revokeOffchain(ref self: ContractState, data: felt252) -> u64 {
-            0_u64
-        }
+        // fn revokeOffchain(ref self: ContractState, data: felt252) -> u64 {
+        //     0_u64
+        // }
 
         /// @notice Revokes the specified multiple bytes32 data.
         /// @param data The data to timestamp.
         /// @return The timestamp the data was revoked with.
-        fn multiRevokeOffchain(ref self: ContractState, data: Array<felt252>) -> u64 {
-            0_u64
-        }
+        // fn multiRevokeOffchain(ref self: ContractState, data: Array<felt252>) -> u64 {
+        //     0_u64
+        // }
 
         /// @notice Returns an existing attestation by UID.
         /// @param uid The UID of the attestation to retrieve.
@@ -417,12 +422,31 @@ mod SAS {
         /// @notice Returns the timestamp that the specified data was timestamped with.
         /// @param data The data to query.
         /// @return The timestamp the data was timestamped with.
-        fn getRevokeOffchain(self: @ContractState, revoker: ContractAddress, data: u256) -> u64 {
-            return self._revocationsOffchain.read((revoker, data));
-        }
+        // fn getRevokeOffchain(self: @ContractState, revoker: ContractAddress, data: u256) -> u64 {
+        //     return self._revocationsOffchain.read((revoker, data));
+        // }
 
         fn getAttestation(self: @ContractState, uid: u256) -> Attestation {
             return self._db.read(uid);
+        }
+
+        fn getAllAttestations(self: @ContractState) -> Array<Attestation> {
+            let mut _allAttestations: Array<Attestation> = ArrayTrait::new();
+            let _getAllUids: Array<u256> = ISchemaRegistryDispatcher {
+                contract_address: self._schemaRegistry.read()
+            }
+                .get_all_uids();
+            let mut i: u32 = 0;
+            loop {
+                let _attestation: Attestation = self.getAttestation(*_getAllUids.at(i));
+                _allAttestations.append(_attestation);
+                i += 1;
+                if (i == _getAllUids.len()) {
+                    break;
+                }
+            };
+
+            return _allAttestations;
         }
 
         fn getNoOfAttestation(self: @ContractState, schemaUID: u256) -> u256 {
@@ -477,6 +501,7 @@ mod SAS {
                 attester: attester,
                 data: data.data,
                 revocable: data.revocable,
+                isRevoked: false
             };
 
             // Look for the first non-existing UID (and use a bump seed/nonce in the rare case of a conflict).
@@ -496,6 +521,7 @@ mod SAS {
                             attester: attester,
                             data: "",
                             revocable: data.revocable,
+                            isRevoked: false
                         },
                         bump
                     );
@@ -713,6 +739,7 @@ mod SAS {
             }
             // let mut _attestation: Attestation = attestation;
             attestation.revocationTime = get_block_timestamp();
+            attestation.isRevoked = true;
 
             //     attestations[i] = attestation;
             //     values[i] = request.value;

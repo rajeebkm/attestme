@@ -27,7 +27,7 @@ async function main(classHash: string) {
     // const classHash = declareResponse.class_hash;
 
     // const deployResponse = await account.deployContract({ classHash: classHash });
-    const deployResponse = await account.deployContract({ classHash: classHash, constructorCalldata: ["0x79bf4b90f4447d4abc7a1b6d6f6482090ed3811b63bedb3efad3fe911cb9f5c"] });
+    const deployResponse = await account.deployContract({ classHash: classHash, constructorCalldata: ["0x6c6fd3dae5772a33cce7952d339242ea6d66b8f48f6b37f5091a2bc1369ab60"] });
     await provider.waitForTransaction(deployResponse.transaction_hash);
 
     // read abi of Test contract
@@ -41,8 +41,8 @@ async function main(classHash: string) {
     console.log('✅ Test Contract connected at =', myTestContract.address);
 }
 
-// const classHash = "0x483aa0f01262e60746de1c306fdc4d7440b70e52267e336772e2400713aee1"; // SchemaRegistry
-const classHash = "0x69548837512a155baf55ff4054b6bda3aba20697fb951a30689afaed5e4f4c5"; // SAS
+// const classHash = "0x48e323ae4da6ee2ad8e8a7f5a103feca28681b1086b6a7f5a39c8b9e3e6af46"; // SchemaRegistry
+const classHash = "0x6f1028982c6fc789c3695383adcaf8256e3639b5a631f2fbb7caa5cac3f6f4d"; // SAS
 main(classHash)
     .then(() => process.exit(0))
     .catch((error) => {
