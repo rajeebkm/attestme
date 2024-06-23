@@ -12,8 +12,6 @@ interface AttestationCount {
 
 interface SchemaData {
     schemaId: string;
-    created: string;
-    creator: string;
     resolverContract: string;
     revocable: string;
     attestationCount: AttestationCount;
@@ -54,12 +52,10 @@ function SchemasView() {
                 if (parsedData[0].uid != "") {
                     const mockData: SchemaData = {
                         schemaId: `0x${parsedData[0].uid.toString(16)}`,
-                        created: "06/17/2024 2:47:36 am (8 hours ago)",
-                        creator: "0x46d2134b87a8e4C4A53E12e0E229c79126bDAfCd",
                         resolverContract: `0x${parsedData[0]?.resolver.toString(16)}`,
                         revocable: parsedData[0]?.revocable.toString(),
                         attestationCount: {
-                            onchain: 0
+                            onchain: 1
                         },
                         rawSchema: parsedData[1].toString(),
                     };
@@ -116,16 +112,6 @@ function SchemasView() {
                         <div className="mb-4 p-4 border rounded-md bg-gray-100 dark:bg-gray-700">
                             <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">Schema UID:</h2>
                             <p className="text-gray-600 dark:text-gray-400">{schemaData.schemaId}</p>
-                        </div>
-
-                        <div className="mb-4 p-4 border rounded-md bg-gray-100 dark:bg-gray-700">
-                            <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">Created:</h2>
-                            <p className="text-gray-600 dark:text-gray-400">{schemaData.created}</p>
-                        </div>
-
-                        <div className="mb-4 p-4 border rounded-md bg-gray-100 dark:bg-gray-700">
-                            <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">Creator:</h2>
-                            <p className="text-gray-600 dark:text-gray-400">{schemaData.creator}</p>
                         </div>
 
                         <div className="mb-4 p-4 border rounded-md bg-gray-100 dark:bg-gray-700">
